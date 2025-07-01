@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+           
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            
+            background-image: url("https://t3.ftcdn.net/jpg/02/55/81/40/360_F_255814073_eVeqoLhJQ31uBZ3fcgaaRcYgEtYDkYkF.jpg");
+background-size: cover;
+    background-attachment: fixed;   /* Image stays fixed while scrolling */
+    background-position: center;
+    background-repeat: no-repeat;
+
+        }
+
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 10px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #d6d6d6;
+        }
+
+        #next-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Simple Quiz</h1>
+    
+    <div id="quiz">
+        <div class="question" id="question">Question Text</div>
+        
+        <div class="options">
+            <button class="option-btn" id="option1" onclick="selectOption(0)"></button>
+            <button class="option-btn" id="option2" onclick="selectOption(1)"></button>
+            <button class="option-btn" id="option3" onclick="selectOption(2)"></button>
+            <button class="option-btn" id="option4" onclick="selectOption(3)"></button>
+        </div>
+        
+        <button id="next-btn" onclick="nextQuestion()">Next</button>
+    </div>
+    
+    <div id="result-container" class="hide">
+        <h2>Your Score:</h2>
+        <p id="score"></p>
+        <button onclick="restartQuiz()">Restart Quiz</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+    {
+        question: "What does HTML stand for?",
+        options: [
+            "Hyper Text Markup Language",
+            "Home Tool Markup Language",
+            "Hyperlinks and Text Markup Language",
+            "Hyper Tool Machine Language"
+        ],
+        answer: 0
+    },
+    {
+        question: "Which language is used for styling web pages?",
+        options: [
+            "HTML",
+            "JQuery",
+            "CSS",
+            "XML"
+        ],
+        answer: 2
+    },
+    {
+        question: "Which is a programming language?",
+        options: [
+            "HTML",
+            "CSS",
+            "Python",
+            "Photoshop"
+        ],
+        answer: 2
+    },
+    {
+        question: "What does CSS stand for?",
+        options: [
+            "Cascading Style Sheets",
+            "Colorful Style Sheets",
+            "Creative Style Sheets",
+            "Computer Style Sheets"
+        ],
+        answer: 0
+    },
+    {
+        question: "Which tag is used to insert a line break in HTML?",
+        options: [
+            "<lb>",
+            "<break>",
+            "<br>",
+            "<line>"
+        ],
+        answer: 2
+    },
+    {
+        question: "Which HTML attribute specifies an alternate text for an image?",
+        options: [
+            "alt",
+            "title",
+            "src",
+            "href"
+        ],
+        answer: 0
+    },
+    {
+        question: "In which year was JavaScript created?",
+        options: [
+            "1995",
+            "2000",
+            "2010",
+            "1990"
+        ],
+        answer: 0
+    },
+    {
+        question: "Which of the following is NOT a programming language?",
+        options: [
+            "Python",
+            "Java",
+            "HTML",
+            "C++"
+        ],
+        answer: 2
+    },
+    {
+        question: "What symbol is used for comments in CSS?",
+        options: [
+            "// comment",
+            "<!-- comment -->",
+            "/* comment */",
+            "# comment"
+        ],
+        answer: 2
+    },
+    {
+        question: "Which property is used in CSS to change text color?",
+        options: [
+            "background-color",
+            "text-color",
+            "font-color",
+            "color"
+        ],
+        answer: 3
+    
+
+
+    }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let timer;
+let timeLeft = 30;
+let answered = false;
+
+const questionElement = document.getElementById("question");
+const optionButtons = [
+    document.getElementById("option1"),
+    document.getElementById("option2"),
+    document.getElementById("option3"),
+    document.getElementById("option4")
+];
+const nextButton = document.getElementById("next-btn");
+const quizContainer = document.getElementById("quiz");
+const resultContainer = document.getElementById("result-container");
+const scoreDisplay = document.getElementById("score");
+
+// Timer display setup
+const timerDisplay = document.createElement("p");
+timerDisplay.style.marginTop = "15px";
+timerDisplay.style.fontWeight = "bold";
+quizContainer.appendChild(timerDisplay);
+
+function showQuestion() {
+    resetTimer();
+    answered = false;
+    const q = questions[currentQuestion];
+    questionElement.textContent = q.question;
+    q.options.forEach((option, index) => {
+        optionButtons[index].textContent = option;
+        optionButtons[index].disabled = false;
+        optionButtons[index].style.backgroundColor = "#e0e0e0";
+    });
+    nextButton.style.display = "none";
+    startTimer();
+}
+
+function selectOption(selectedIndex) {
+    const correctIndex = questions[currentQuestion].answer;
+    optionButtons.forEach(btn => btn.disabled = true);
+
+    if (selectedIndex === correctIndex) {
+        optionButtons[selectedIndex].style.backgroundColor = "#4caf50";
+        score++;
+    } else {
+        optionButtons[selectedIndex].style.backgroundColor = "#f44336";
+    }
+
+    answered = true;
+    nextButton.style.display = "inline-block";
+}
+
+function nextQuestion() {
+    clearInterval(timer);
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    quizContainer.classList.add("hide");
+    resultContainer.classList.remove("hide");
+    scoreDisplay.textContent = `${score} out of ${questions.length}`;
+
+    if (score === questions.length) {
+        showCongratulations();
+    }
+}
+function restartQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    quizContainer.classList.remove("hide");
+    resultContainer.classList.add("hide");
+    showQuestion();
+}
+
+function startTimer() {
+    timeLeft = 30;
+    updateTimerDisplay();
+
+    timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            moveNextAfterTime();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    timerDisplay.textContent = `Time Left: ${formatTime(minutes)}:${formatTime(seconds)}`;
+}
+
+function formatTime(num) {
+    return num < 10 ? "0" + num : num;
+}
+
+function resetTimer() {
+    clearInterval(timer);
+    timerDisplay.textContent = "";
+}
+
+function moveNextAfterTime() {
+    // Disable all options
+    optionButtons.forEach(btn => btn.disabled = true);
+    
+    // Do NOT show correct answer
+
+    // Automatically move to next question after 2 seconds
+    setTimeout(() => {
+        nextQuestion();
+    }, 2000);
+}
+
+showQuestion();
+
+
+</script>
+
+</body>
+</html>
